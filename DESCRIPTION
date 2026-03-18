@@ -1,0 +1,31 @@
+Package: aiMoralPersuasion
+Type: Project
+Title: AI Moral Persuasion Analysis
+Version: 1.0.0
+Description: Reproducible analyses supporting "Using Human-AI Dialogues for
+    Moral Persuasion" (White, Allen, Caviola, & Rand).
+License: CC-By Attribution 4.0 International
+Depends:
+    R (>= 4.4.0)
+Imports:
+    dplyr,
+    tidyr,
+    readr,
+    ggplot2,
+    stringr,
+    purrr,
+    tibble,
+    lubridate,
+    estimatr,
+    effsize,
+    patchwork,
+    ggtext,
+    ggdist,
+    cowplot,
+    mediation,
+    psych,
+    osfr,
+    here,
+    fs
+Suggests:
+    renv

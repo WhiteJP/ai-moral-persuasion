@@ -1,0 +1,56 @@
+# R session files
+.Rhistory
+Rplots.pdf
+.Rapp.history
+.RData
+.RDataTmp
+.Ruserdata
+
+# RStudio files
+.Rproj.user/
+
+# R environment variables (may contain secrets)
+.Renviron
+
+# Build artifacts
+/*.tar.gz
+/*.Rcheck/
+*-Ex.R
+
+# Knitr / R Markdown
+*_cache/
+/cache/
+*.utf8.md
+*.knit.md
+
+# Vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# pkgdown / docs
+docs/
+
+# Translation temp files
+po/*~
+
+# RStudio Connect
+rsconnect/
+
+# Cursor / VS Code
+.cursor/
+.history/
+.vscode/
+
+# Data (downloaded at runtime from OSF)
+data/
+
+# Output (generated at runtime)
+output/
+
+# renv library (only lock file is committed)
+renv/library/
+renv/staging/
+renv/sandbox/
+renv/cellar/
+renv/local/
+renv/python/
