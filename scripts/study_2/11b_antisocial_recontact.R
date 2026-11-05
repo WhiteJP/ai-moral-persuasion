@@ -368,14 +368,15 @@ print(as_rci_tbl, n = Inf, width = Inf)
 # =============================================================================
 # 11. ANTISOCIAL RECONTACT: POLITICAL-VIOLENCE VIGNETTE
 # =============================================================================
-# Round 1 has no pre-treatment vignette, so t1 is the round-1 post measure.
+# Round 1 has no pre-treatment vignette, and the control arm was not
+# recontacted. The follow-up contrast is therefore each returner's last
+# vignette score against the control arm's time-1 score. Last is t4 when
+# they had the further conversation, otherwise t3.
 # Higher scores = more endorsement of violence (except punishment, where 1 =
-# punish). Recontact respondents only. t3 is the recontact rating before the
-# further conversation; last is t4 when they had it, otherwise t3.
-# Outcomes: three items, the mean of those three (0-100), and the preregistered
-# composite (z): (z_support + z_justification + z_punishment_rev) / 3, with
-# z-scores using round-1 polviol completer means and SDs so timepoints share
-# a common metric.
+# punish). The within-person panel below z-scores the composite on round-1
+# political-violence completers so timepoints share a metric. The contrast
+# with control uses the full round-1 completer means and SDs, the same
+# standardization as the round-1 composite.
 
 section("ANTISOCIAL RECONTACT: PV VIGNETTE")
 
@@ -461,6 +462,107 @@ pv_means <- d_pv_plot |>
   mutate(timepoint = factor(timepoint, levels = tp_pv_levels))
 
 print(pv_means, n = Inf)
+
+# --- Last follow-up vs control time 1 ----------------------------------------
+# No pretreatment vignette and no recontact control arm.
+
+section("PV VIGNETTE: LAST FOLLOW-UP VS CONTROL TIME 1")
+cat("Welch t-test of the last recontact score minus the control arm's time-1 score.\n")
+cat("Composite z-scores use full round-1 completer means and SDs (same scale as round 1).\n\n")
+
+d1_pv <- d1 |>
+  mutate(pv_punishment_rev = 1 - pv_punishment)
+pv_full_center <- list(
+  support = mean(d1_pv$pv_support, na.rm = TRUE),
+  justification = mean(d1_pv$pv_justification, na.rm = TRUE),
+  punishment_rev = mean(d1_pv$pv_punishment_rev, na.rm = TRUE)
+)
+pv_full_scale <- list(
+  support = sd(d1_pv$pv_support, na.rm = TRUE),
+  justification = sd(d1_pv$pv_justification, na.rm = TRUE),
+  punishment_rev = sd(d1_pv$pv_punishment_rev, na.rm = TRUE)
+)
+pv_comp_full <- function(support, justification, punishment) {
+  (
+    (support - pv_full_center$support) / pv_full_scale$support +
+      (justification - pv_full_center$justification) / pv_full_scale$justification +
+      ((1 - punishment) - pv_full_center$punishment_rev) / pv_full_scale$punishment_rev
+  ) / 3
+}
+
+d_pv_last <- d_as |>
+  filter(condition == "polviol") |>
+  transmute(
+    support = coalesce(pv_support_t4, pv_support_t3),
+    justification = coalesce(pv_justification_t4, pv_justification_t3),
+    participation = coalesce(pv_participation_t4, pv_participation_t3),
+    punishment = coalesce(pv_punishment_t4, pv_punishment_t3),
+    mean3 = (support + justification + participation) / 3,
+    composite = pv_comp_full(support, justification, punishment)
+  )
+d_ctrl_t1 <- d1_pv |>
+  filter(condition == "control") |>
+  transmute(
+    support = pv_support,
+    justification = pv_justification,
+    participation = pv_participation,
+    punishment = pv_punishment,
+    mean3 = (pv_support + pv_justification + pv_participation) / 3,
+    composite = pv_comp_full(pv_support, pv_justification, pv_punishment)
+  )
+
+welch_vs_ctrl <- function(follow, control, lab) {
+  follow <- follow[!is.na(follow)]
+  control <- control[!is.na(control)]
+  tt <- t.test(follow, control)
+  tibble(
+    item = lab,
+    n_follow = length(follow),
+    n_control = length(control),
+    follow = mean(follow),
+    control = mean(control),
+    diff = mean(follow) - mean(control),
+    ci_lower = tt$conf.int[1],
+    ci_upper = tt$conf.int[2],
+    t = unname(tt$statistic),
+    df = unname(tt$parameter),
+    p = tt$p.value
+  )
+}
+
+pv_ctrl_items <- c(
+  participation = "Willingness to join",
+  support = "Support crowd",
+  justification = "Justification",
+  mean3 = "Mean of three",
+  composite = "Preregistered composite"
+)
+pv_ctrl_tbl <- purrr::map_dfr(names(pv_ctrl_items), function(nm) {
+  welch_vs_ctrl(d_pv_last[[nm]], d_ctrl_t1[[nm]], pv_ctrl_items[[nm]])
+})
+print(pv_ctrl_tbl |> mutate(p = fmt_p(p)), n = Inf, width = Inf)
+
+# Punishment is 1 = should be punished. Two-proportion test with continuity correction.
+pun_follow <- d_pv_last$punishment[!is.na(d_pv_last$punishment)]
+pun_control <- d_ctrl_t1$punishment[!is.na(d_ctrl_t1$punishment)]
+pun_prop <- prop.test(
+  c(sum(pun_follow), sum(pun_control)),
+  c(length(pun_follow), length(pun_control)),
+  correct = TRUE
+)
+pun_ctrl_tbl <- tibble(
+  item = "Punishment (should be punished)",
+  n_follow = length(pun_follow),
+  n_control = length(pun_control),
+  pct_follow = 100 * mean(pun_follow),
+  pct_control = 100 * mean(pun_control),
+  diff_pp = 100 * (mean(pun_follow) - mean(pun_control)),
+  ci_lower_pp = 100 * pun_prop$conf.int[1],
+  ci_upper_pp = 100 * pun_prop$conf.int[2],
+  p = fmt_p(pun_prop$p.value)
+)
+cat("\nPunishment, two-proportion test (continuity correction), follow-up minus control:\n")
+print(pun_ctrl_tbl, n = Inf, width = Inf)
 
 # --- t1 vs recontact pre and vs last -----------------------------------------
 
