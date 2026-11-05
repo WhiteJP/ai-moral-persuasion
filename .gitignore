@@ -47,6 +47,21 @@ data/
 # Output (generated at runtime)
 output/
 
+# NLP classification checkpoints (resume state; not versioned)
+scripts/text_analysis/**/checkpoint_*.json
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Local exploratory analyses (not versioned)
+extra_analyses/
+scripts/other_analyses/
+other_analyses/
+
+# Personal Qualtrics API download
+/download_qualtrics.R
+
 # renv library (only lock file is committed)
 renv/library/
 renv/staging/

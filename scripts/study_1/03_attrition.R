@@ -14,9 +14,9 @@ library(tibble)
 
 source(here::here("scripts", "functions", "helpers.R"))
 
-d1_itt <- readRDS(here::here("data", "d1_itt.rds"))
-d1     <- readRDS(here::here("data", "d1.rds"))
-d      <- readRDS(here::here("data", "d.rds"))
+d1_itt <- readRDS(here::here("data", "study_1", "d1_itt.rds"))
+d1     <- readRDS(here::here("data", "study_1", "d1.rds"))
+d      <- readRDS(here::here("data", "study_1", "d.rds"))
 
 # Helper to build and test a 2x2 attrition matrix
 test_attrition <- function(pre_data, post_data, label) {
@@ -43,19 +43,19 @@ test_attrition <- function(pre_data, post_data, label) {
 }
 
 # =============================================================================
-# TEST 1: ITT → Final initial sample (post-randomization dropout)
+# TEST 1: ITT → Final initial sample (post-randomization dropout) (prereg)
 # =============================================================================
 
 test_attrition(d1_itt, d1, "ATTRITION: ITT -> FINAL INITIAL SAMPLE")
 
 # =============================================================================
-# TEST 2: ITT → Follow-up sample
+# TEST 2: ITT → Follow-up sample (prereg)
 # =============================================================================
 
 test_attrition(d1_itt, d, "ATTRITION: ITT -> FOLLOW-UP SAMPLE")
 
 # =============================================================================
-# TEST 3: Final initial sample → Follow-up sample
+# TEST 3: Final initial sample → Follow-up sample (exploratory)
 # =============================================================================
 
 test_attrition(d1, d, "ATTRITION: FINAL INITIAL SAMPLE -> FOLLOW-UP SAMPLE")

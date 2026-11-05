@@ -6,7 +6,7 @@
 #' unless overwrite = TRUE.
 #'
 #' @param osf_node_id Character string, the 5-character OSF node identifier.
-#' @param osf_path Optional subfolder path within the OSF node (e.g. "data").
+#' @param osf_path Optional subfolder path within the OSF node (e.g. "study_1/data").
 #'   If NULL, downloads all top-level files and recurses into folders.
 #' @param dest_dir Local directory to save downloaded files.
 #' @param overwrite If TRUE, re-download even if files already exist.
@@ -20,7 +20,7 @@ download_osf_data <- function(osf_node_id,
   node <- osfr::osf_retrieve_node(osf_node_id)
 
   if (!is.null(osf_path)) {
-    all_files <- osfr::osf_ls_files(node, path = osf_path, n_max = Inf)
+    all_files <- osfr::osf_ls_files(node, path = osf_path, n_max = Inf, type = "file")
   } else {
     all_files <- osfr::osf_ls_files(node, n_max = Inf, type = "file")
   }

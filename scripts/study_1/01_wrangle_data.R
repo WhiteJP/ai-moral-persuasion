@@ -4,7 +4,7 @@
 # Loads raw Qualtrics CSVs (initial + follow-up), creates analysis variables,
 # defines sample stages, and saves analysis datasets.
 #
-# Produces (saved to data/):
+# Produces (saved to data/study_1/):
 #   d1_all.rds   - all initial-study rows
 #   d1_itt.rds   - treated + passed attention check (ITT sample)
 #   d1.rds       - ITT + finished survey (final initial sample, N ≈ 500)
@@ -25,7 +25,7 @@ source(here::here("scripts", "functions", "helpers.R"))
 # =============================================================================
 
 d1_raw <- read_csv_qualtrics(
-  here::here("data", "study1_initial.csv"),
+  here::here("data", "study_1", "study1_initial.csv"),
   show_col_types = FALSE
 )
 
@@ -106,7 +106,7 @@ d1         <- d1_itt |> filter(Finished == 1)
 # =============================================================================
 
 d2_raw <- read_csv_qualtrics(
-  here::here("data", "study1_followup.csv"),
+  here::here("data", "study_1", "study1_followup.csv"),
   show_col_types = FALSE
 )
 
@@ -140,11 +140,11 @@ d <- d_all |> filter(!is.na(meat_wrong_t2))
 # SAVE
 # =============================================================================
 
-saveRDS(d1_all, here::here("data", "d1_all.rds"))
-saveRDS(d1_itt, here::here("data", "d1_itt.rds"))
-saveRDS(d1,     here::here("data", "d1.rds"))
-saveRDS(d2,     here::here("data", "d2.rds"))
-saveRDS(d,      here::here("data", "d.rds"))
+saveRDS(d1_all, here::here("data", "study_1", "d1_all.rds"))
+saveRDS(d1_itt, here::here("data", "study_1", "d1_itt.rds"))
+saveRDS(d1,     here::here("data", "study_1", "d1.rds"))
+saveRDS(d2,     here::here("data", "study_1", "d2.rds"))
+saveRDS(d,      here::here("data", "study_1", "d.rds"))
 
 cat(sprintf(paste0(
   "Data wrangling complete.\n",

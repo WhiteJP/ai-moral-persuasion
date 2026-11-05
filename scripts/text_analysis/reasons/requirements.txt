@@ -1,0 +1,6 @@
+# Study 2 skeptic-reasons classification dependencies
+# Install with: pip install -r scripts/text_analysis/reasons/requirements.txt
+
+pandas>=2.0.0
+openai>=1.0.0
+tqdm>=4.65.0

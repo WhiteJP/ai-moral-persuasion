@@ -1,138 +1,135 @@
 # ai-moral-persuasion
 
-This repository contains the complete code to reproduce all analyses, figures, and tables for our research paper:
+Complete code to reproduce all analyses, figures, and tables for:
 
-**White, J. P., Allen, C., Caviola, L., & Rand, D. G. (2026). Using Human-AI Dialogues for Moral Persuasion.**
+**White, J. P., Allen, C., Caviola, L., & Rand, D. G. Using Human-AI Dialogues for Moral Persuasion.**
 
-## Quick Start
+**Study 1** is the pilot. It is reported briefly in the main text and in full in the supplementary materials. **Study 2** is the main study reported in the paper.
 
-### Prerequisites
+## Quick start
 
-- **R 4.4.0+** — Download from [r-project.org](https://cran.r-project.org/)
-- **RStudio** (recommended) — Download from [posit.co](https://posit.co/download/rstudio-desktop/)
+1. Clone this repository and open `ai-moral-persuasion.Rproj` in RStudio (or set the working directory to the repo root).
 
-### Reproduce all analyses
-
-1. **Clone the repository:**
-
-```bash
-git clone https://github.com/WhiteJP/ai-moral-persuasion.git
-cd ai-moral-persuasion
-```
-
-2. **Open the RStudio project:**
-   Double-click `ai-moral-persuasion.Rproj`, or open RStudio and go to File → Open Project.
-
-3. **Install dependencies:**
+2. Install R packages at the locked versions:
 
 ```r
 renv::restore()
 ```
 
-This will install all R packages at the exact versions used in our analyses. It may take 5–10 minutes on a first run.
-
-4. **Run all analyses:**
+3. Run the full analysis pipeline:
 
 ```r
 source("main.R")
 ```
 
-This downloads the data from OSF (if not already present), runs every analysis script in order, prints all statistical output to the console, and saves the main figure.
+That downloads Study 1 and Study 2 survey data from OSF (if needed), including the frozen Study 2 LLM text ratings, runs every analysis script in paper order, prints reported statistics to the console, and writes figures and tables under `output/`.
 
-### Expected Output
+**Default reproduction uses the deposited ratings.** You do not need Python or an API key to reproduce the paper numbers, figures, and tables.
 
-- **Console output**: Sample flow, demographics, attrition chi-squared tests, all preregistered analyses with effect sizes, and persistence rates — all printed to the console.
-- **Figure**: `output/figures/fig-combined.png` (Figure 1 from the paper).
-- **Runtime**: ~2–5 minutes total (after packages are installed).
+Expected runtime after packages are installed: on the order of tens of minutes (Study 2 mediation bootstraps dominate).
 
-### Alternative: Run scripts individually
+### Optional: copy outputs into the manuscript repo
 
-If you prefer to explore interactively, run each script in RStudio in the order shown in `main.R`:
+At the top of `main.R`:
 
 ```r
-source("scripts/00_download_data.R")       # Download data from OSF
-source("scripts/01_wrangle_data.R")        # Wrangle raw data, create analysis samples
-source("scripts/02_sample_descriptives.R") # Sample flow, demographics
-source("scripts/03_attrition_analysis.R")  # Attrition chi-squared tests
-source("scripts/04_main_analyses.R")       # Preregistered analyses, persistence rates
-source("scripts/05_figure.R")             # Figure 1 (6-panel combined figure)
+save_to_paper_repo <- FALSE   # set TRUE only while updating the manuscript
 ```
+
+When `TRUE`, selected PDFs and `.tex` tables are also copied into the sibling repo `../llm-moral-persuasion/paper/`. Leave it `FALSE` for a public clone (the committed default). Analysis outputs always go to `output/` in this repository.
 
 ## Data
 
-The data is hosted on the Open Science Framework (OSF): <https://osf.io/rwn89>
+OSF project: <https://osf.io/rwn89>
 
-**Automatic download**: Running `main.R` (or `scripts/00_download_data.R`) automatically downloads all data files into the `data/` directory. If files already exist locally, the download is skipped.
+| Path on OSF | Local destination |
+|-------------|-------------------|
+| `study_1/data` | `data/study_1/` |
+| `study_2/data` | `data/study_2/` |
+| `study_2/text_ratings` | `data/study_2/text_ratings/` |
 
-### Data files
+Raw Qualtrics exports and pre-computed LLM ratings are downloaded automatically. They are gitignored.
 
-| File | Description |
-|------|-------------|
-| `study1_initial.csv` | Qualtrics export from the initial study (N = 559 pre-exclusion) |
-| `study1_followup.csv` | Qualtrics export from the one-month follow-up study |
-| `classifications_4ns.csv` | LLM classifications of meat "4Ns" reasoning (Natural, Normal, Necessary, Nice) |
-| `classifications_other.csv` | LLM classifications of other meat reasoning (Amoral, Conditional, Religious) |
-| `classifications_reasoning.csv` | LLM classifications of charity reasoning types |
-| `classifications_persuasion_strategies.csv` | LLM ratings of AI persuasion strategies across conversations |
+Study 2 text-rating files used by the paper:
 
-The first two files are raw Qualtrics survey exports. The remaining four contain pre-computed NLP classifications produced by three LLMs (Claude, GPT, DeepSeek) with majority-vote consensus scoring. These are used for Figure 1 panels D–F.
+- `strategy_ratings.csv` — persuasion-strategy ratings (Claude, GPT, and Grok)
+- `classifications_{meat,charity,lying,polviol}.csv` — participant reason codes
+- `direct_lie_moves_{claude-opus-55,gpt-55,grok-47}.csv` — direct-lie flags for the lying arm
 
-## Repository Structure
+## Optional: re-run Study 2 LLM text coding
+
+Study 1 ratings are only the files downloaded into `data/study_1/`. There is no re-run path for them.
+
+Study 2 reads the frozen CSVs above. You can optionally regenerate those ratings with the Python scripts under [`scripts/text_analysis/`](scripts/text_analysis/). That path is **not** required for reproducibility of the reported results.
+
+Re-running the classifiers:
+
+- Requires **Python 3**, the packages in `scripts/text_analysis/*/requirements.txt`, and an **OpenRouter API key** (`OPENROUTER_API_KEY`)
+- Calls paid LLM APIs and can take a long time / cost money
+- **Need not match the deposited ratings exactly.** Model versions, provider routing, and non-determinism can change labels even at temperature 0. Treat a re-run as a robustness check, not a bit-for-bit reproduction
+
+See [`scripts/text_analysis/README.md`](scripts/text_analysis/README.md) for setup and commands. The Python scripts do nothing unless you pass `--run`. To regenerate ratings inside the pipeline, set `rerun_text_analysis <- TRUE` at the top of `main.R` (the committed default is `FALSE`). That calls the classifiers and copies the new CSVs into `data/study_2/text_ratings/` before the Study 2 analyses. A re-run need not match the deposited labels exactly.
+
+## Repository structure
 
 ```
 ai-moral-persuasion/
-├── main.R                              # Master script (runs everything)
-├── DESCRIPTION                         # R package dependencies
-├── renv.lock                           # Locked package versions
-├── renv/                               # renv library management
+├── main.R
+├── DESCRIPTION / renv.lock     # R package dependencies (locked)
 ├── scripts/
-│   ├── functions/
-│   │   ├── agreement_functions.R       # ICC & Cronbach's alpha (from effective-giving-AI-persuasion)
-│   │   ├── read_csv_qualtrics.R        # Qualtrics CSV reader
-│   │   ├── download_data.R             # OSF download helper
-│   │   └── helpers.R                   # Shared utilities (consensus, demographics, etc.)
-│   ├── 00_download_data.R              # Download data from OSF
-│   ├── 01_wrangle_data.R              # Data wrangling & sample definitions
-│   ├── 02_sample_descriptives.R       # Sample flow, demographics
-│   ├── 03_attrition_analysis.R        # Differential attrition tests
-│   ├── 04_main_analyses.R             # Preregistered analyses & persistence rates
-│   ├── 04b_llm_agreement.R           # LLM classification agreement (ICC, alpha, % agree)
-│   └── 05_figure.R                    # Figure 1 (6-panel combined figure)
-├── data/                               # Downloaded at runtime (gitignored)
-└── output/
-    └── figures/                        # Generated figures (gitignored)
+│   ├── functions/              # shared R helpers
+│   ├── study_1/                # pilot (briefly in the main text; full results in the supplement)
+│   ├── study_2/                # main study, paper order
+│   └── text_analysis/          # optional Python LLM reruns
+├── data/                       # downloaded at runtime (gitignored)
+└── output/                     # generated figures and tables (gitignored)
 ```
 
-## What Each Script Produces
+Exploratory work lives in `extra_analyses/` (gitignored) and is **not** sourced by `main.R`. Ignore that folder when reproducing the paper.
 
-| Script | Paper Section | Output |
-|--------|---------------|--------|
-| `02_sample_descriptives.R` | Methods: Participants | Sample sizes (559 → 528 → 500), demographics |
-| `03_attrition_analysis.R` | SM: Participants | Chi-squared tests for differential attrition |
-| `04_main_analyses.R` | Results | All 6 preregistered ATEs with Cohen's d, persistence rates |
-| `04b_llm_agreement.R` | SM: LLM reliability | % all-3-agree (reasoning), ICC & Cronbach's alpha (strategies) |
-| `05_figure.R` | Results: Figure 1 | Combined 6-panel figure (belief change, donation, voucher, reasoning, strategies) |
+Shared Study 2 display labels/colors live in `scripts/functions/study2_style.R` (condition name for the lying arm is **Lying** everywhere).
 
-## Preregistered Analyses
+## Study 2 script order
 
-The study was preregistered at <https://aspredicted.org/t28hb8.pdf>. Script `04_main_analyses.R` runs all preregistered analyses on both the full sample and the preregistered exclusion sample (excluding participants scoring >75 on their conversation-relevant pre-treatment belief).
+| Script | Paper content |
+|--------|----------------|
+| `00_download_data.R` | OSF download |
+| `01_wrangle_data.R` | Analysis samples |
+| `02_sample_descriptives.R` | Sample flow, demographics |
+| `03_attrition.R` | Attrition tests and supplement tables |
+| `04_main_analyses.R` | Orchestrator → `04a` immediate + `04b` follow-up / persistence |
+| `05_main_figures.R` | `fig-meat`, `fig-charity`, `fig-lying`, `fig-polviol` |
+| `06_belief_behavior_correlations.R` | SI belief–behavior correlations |
+| `07_direct_lie.R` | Direct-lie shares and heads rates |
+| `08_pro_v_anti.R` | Pro- vs antisocial contrasts |
+| `09_belief_mediation.R` | Belief mediation table |
+| `10_moderation.R` | Moderation and Holm table |
+| `11_corrective.R` | Orchestrator → `11a` corrective + `11b` antisocial recontact |
+| `12_spillover_effects.R` | Spillover matrices and TE figure |
+| `13_rating_mediators.R` | Conversation-rating mediation table |
+| `14_reasons.R` | Orchestrator → `14a` prevalence + `14b` outcomes + `14c` agreement |
+| `15_strategies.R` | Strategy figure and agreement table |
 
-| Analysis | Outcome | Model |
-|----------|---------|-------|
-| 1 | Belief difference (charity − meat) | Lin estimator |
-| 2a | Meat belief change | Lin estimator |
-| 2b | Charity belief change | Lin estimator |
-| 3 | Donation to AMF (cents) | Lin estimator |
-| 4 | Voucher choice (veg vs. beef) | Logistic regression |
-| 5a–b | Reflection DVs (meat consumption, donation) | Lin estimator (winsorized) |
-| 6a–d | Follow-up versions of analyses 1–4 | Same as above |
+Hand-authored manuscript assets (study design figure, example dialogues, `conditions.tex`, `justification-codes.tex`) live in the paper repository and are not generated here.
 
-## System Requirements
+## System requirements
 
-**Software**: R (≥ 4.4.0), RStudio (recommended)
+**Required for `source("main.R")`:**
 
-**R packages** (automatically installed via `renv`): dplyr, tidyr, readr, ggplot2, stringr, purrr, tibble, lubridate, estimatr, effsize, patchwork, ggtext, ggdist, cowplot, osfr, here, fs
+- **R 4.5.x** (the lockfile was built with R 4.5.3)
+- RStudio recommended
+- R packages via `renv::restore()` (see `DESCRIPTION` / `renv.lock`)
 
-**Hardware**: Any standard desktop or laptop.
+`renv.lock` pins package **versions** from CRAN. On restore, renv installs those versions for your OS (macOS, Windows, or Linux). You do not need the authors' local `renv/library/` folders.
 
-**OS**: Tested on Windows 11, but should work on macOS and Linux.
+**Platform notes**
+
+- Paths use `here` / `file.path`, so Windows path separators are fine.
+- Figure PDFs use Quartz + Arial on macOS when available; elsewhere they fall back to `cairo_pdf`. On Linux you may need a Cairo-capable R build (common with CRAN binaries). Figure layout can differ slightly by OS/font, but the underlying estimates do not.
+- Optional PDF trimming looks for `python3` or `python` plus `pypdf`; if missing, untrimmed PDFs are still written.
+- Compiled packages (e.g. dplyr, readr, estimatr) install from CRAN binaries when available. On Windows, install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) only if a package must be compiled from source.
+
+**Optional (LLM re-runs only):**
+
+- Python 3 and `pip install -r scripts/text_analysis/*/requirements.txt`
+- OpenRouter API key (`OPENROUTER_API_KEY`; on Windows PowerShell: `$env:OPENROUTER_API_KEY="..."`)

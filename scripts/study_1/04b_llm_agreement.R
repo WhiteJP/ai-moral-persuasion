@@ -18,7 +18,7 @@ library(here)
 source(here("scripts", "functions", "helpers.R"))
 source(here("scripts", "functions", "agreement_functions.R"))
 
-d1 <- readRDS(here("data", "d1.rds"))
+d1 <- readRDS(here("data", "study_1", "d1.rds"))
 
 # =============================================================================
 # HELPER: Convert logical-like columns (handles "True"/"False" strings)
@@ -72,8 +72,8 @@ section("LLM AGREEMENT: REASONING CLASSIFICATIONS (pre score <= 50)", char = "#"
 
 # --- Meat group: 4Ns + other ---
 
-df_4ns <- read_csv(here("data", "classifications_4ns.csv"), show_col_types = FALSE)
-df_other <- read_csv(here("data", "classifications_meat_other.csv"), show_col_types = FALSE)
+df_4ns <- read_csv(here("data", "study_1", "classifications_4ns.csv"), show_col_types = FALSE)
+df_other <- read_csv(here("data", "study_1", "classifications_meat_other.csv"), show_col_types = FALSE)
 
 d_meat <- d1 |>
   filter(condition == "Meat", meat_wrong_pre <= 50) |>
@@ -113,7 +113,7 @@ print(meat_agreement)
 
 # --- Charity group ---
 
-df_charity <- read_csv(here("data", "classifications_charity_reasoning.csv"),
+df_charity <- read_csv(here("data", "study_1", "classifications_charity_reasoning.csv"),
                        show_col_types = FALSE)
 
 charity_cats <- c(
@@ -164,7 +164,7 @@ print(as.data.frame(reasoning_pct_summary), row.names = FALSE, right = FALSE)
 
 section("LLM AGREEMENT: PERSUASION STRATEGY RATINGS (ICC & Cronbach's alpha)", char = "#")
 
-d_strat <- read_csv(here("data", "classifications_persuasion_strategies.csv"),
+d_strat <- read_csv(here("data", "study_1", "classifications_persuasion_strategies.csv"),
                     show_col_types = FALSE)
 
 strategies <- c("evidence_facts", "logical_consistency", "moral_principles",

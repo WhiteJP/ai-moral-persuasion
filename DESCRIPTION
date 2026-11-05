@@ -6,7 +6,7 @@ Description: Reproducible analyses supporting "Using Human-AI Dialogues for
     Moral Persuasion" (White, Allen, Caviola, & Rand).
 License: CC-By Attribution 4.0 International
 Depends:
-    R (>= 4.4.0)
+    R (>= 4.5.0)
 Imports:
     dplyr,
     tidyr,
@@ -16,6 +16,8 @@ Imports:
     purrr,
     tibble,
     lubridate,
+    forcats,
+    rlang,
     estimatr,
     effsize,
     patchwork,
@@ -24,6 +26,7 @@ Imports:
     cowplot,
     mediation,
     psych,
+    jsonlite,
     osfr,
     here,
     fs

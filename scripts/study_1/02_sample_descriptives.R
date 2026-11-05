@@ -9,10 +9,10 @@ library(lubridate)
 
 source(here::here("scripts", "functions", "helpers.R"))
 
-d1_all <- readRDS(here::here("data", "d1_all.rds"))
-d1_itt <- readRDS(here::here("data", "d1_itt.rds"))
-d1     <- readRDS(here::here("data", "d1.rds"))
-d      <- readRDS(here::here("data", "d.rds"))
+d1_all <- readRDS(here::here("data", "study_1", "d1_all.rds"))
+d1_itt <- readRDS(here::here("data", "study_1", "d1_itt.rds"))
+d1     <- readRDS(here::here("data", "study_1", "d1.rds"))
+d      <- readRDS(here::here("data", "study_1", "d.rds"))
 
 # =============================================================================
 # SAMPLE FLOW
