@@ -220,22 +220,6 @@ conv_from_hause_chatbot <- function(...) {
 
 # --- Paper outputs -----------------------------------------------------------
 
-# Optional second copy into the sibling manuscript repo
-# (../llm-moral-persuasion/paper). Controlled by save_to_paper_repo in main.R.
-# Default FALSE so a public clone only writes output/ in this repository.
-# A mediation smoke test (mediation_bootstrap <- FALSE) never copies, so
-# quasi-Bayesian intervals cannot land in the manuscript. An unset flag
-# means the reported bootstrap. mediation_bootstrap_enabled() is the same
-# check once mediation_helpers.R has been sourced.
-save_to_paper_repo_enabled <- function() {
-  reported_bootstrap <- isTRUE(get0(
-    "mediation_bootstrap", envir = .GlobalEnv, ifnotfound = TRUE, inherits = TRUE
-  ))
-  if (!reported_bootstrap) return(FALSE)
-  isTRUE(get0("save_to_paper_repo", envir = .GlobalEnv, ifnotfound = FALSE,
-              inherits = TRUE))
-}
-
 # Seed, simulation count, and smoke-test switch from mediation_helpers.R,
 # without replacing condition labels or outcome tables already in the session.
 import_mediation_settings <- function() {
@@ -256,10 +240,6 @@ import_mediation_settings <- function() {
   )
   for (nm in keep) assign(nm, get(nm, envir = src), envir = .GlobalEnv)
   invisible(TRUE)
-}
-
-paper_root <- function() {
-  file.path(dirname(here::here()), "llm-moral-persuasion", "paper")
 }
 
 # Quartz writes the PDF with the system Arial, so the text metrics match the
@@ -293,39 +273,25 @@ use_quartz_text_metrics <- function() {
   invisible(TRUE)
 }
 
-#' Save a paper figure as PDF under output/. When save_to_paper_repo is TRUE,
-#' also copy to paper/figures/<study>/. A PNG preview stays next to the analysis copy.
+#' Save a paper figure as PDF under output/. A PNG preview stays next to it.
 save_paper_pdf <- function(plot, filename, width, height, output_dir,
-                           study = "study_2", dpi = 300, png = TRUE) {
+                           dpi = 300, png = TRUE) {
   stopifnot(grepl("\\.pdf$", filename))
   dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
-  dests <- output_dir
-  paper_dir <- NULL
-  if (save_to_paper_repo_enabled()) {
-    paper_dir <- file.path(paper_root(), "figures", study)
-    dir.create(paper_dir, showWarnings = FALSE, recursive = TRUE)
-    dests <- c(dests, paper_dir)
-  }
-  for (dir in dests) {
-    ggplot2::ggsave(
-      file.path(dir, filename), plot,
-      width = width, height = height, units = "in", bg = "white",
-      device = paper_pdf_device()
-    )
-  }
+  dest <- file.path(output_dir, filename)
+  ggplot2::ggsave(
+    dest, plot,
+    width = width, height = height, units = "in", bg = "white",
+    device = paper_pdf_device()
+  )
   if (png) {
     ggplot2::ggsave(
       file.path(output_dir, sub("\\.pdf$", ".png", filename)), plot,
       width = width, height = height, units = "in", dpi = dpi, bg = "white"
     )
   }
-  if (!is.null(paper_dir)) {
-    cat(sprintf("Saved: %s (analysis and paper/figures/%s)\n", filename, study))
-    invisible(file.path(paper_dir, filename))
-  } else {
-    cat(sprintf("Saved: %s\n", file.path(output_dir, filename)))
-    invisible(file.path(output_dir, filename))
-  }
+  cat(sprintf("Saved: %s\n", dest))
+  invisible(dest)
 }
 
 #' PNAS panel label: bold uppercase sans-serif at the top-left corner of the
@@ -346,16 +312,6 @@ PAPER_LABEL_ARGS <- list(
   label_size = 9, label_fontfamily = "Helvetica", label_fontface = "bold",
   label_x = 0, label_y = 1, hjust = 0, vjust = 1
 )
-
-#' Copy a generated .tex table into paper/tables/ when save_to_paper_repo is TRUE.
-copy_paper_table <- function(path) {
-  if (!save_to_paper_repo_enabled()) return(invisible(FALSE))
-  dest_dir <- file.path(paper_root(), "tables")
-  dir.create(dest_dir, showWarnings = FALSE, recursive = TRUE)
-  ok <- file.copy(path, file.path(dest_dir, basename(path)), overwrite = TRUE)
-  if (ok) cat(sprintf("Copied: paper/tables/%s\n", basename(path)))
-  invisible(ok)
-}
 
 #' Apply the SI typesetting conventions to a generated table.
 #'
@@ -397,10 +353,10 @@ paper_table_tex <- function(tex) {
   tex
 }
 
-#' Write a generated table to the analysis output and to paper/tables/.
+#' Write a generated table under output/.
 write_paper_table <- function(tex, path) {
   writeLines(paper_table_tex(tex), path)
-  copy_paper_table(path)
+  invisible(path)
 }
 
 # --- Printing helpers --------------------------------------------------------

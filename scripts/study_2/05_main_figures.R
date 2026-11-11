@@ -22,12 +22,6 @@ s2_t2 <- readRDS(here("data", "study_2", "study2_d.rds"))
 
 output_dir <- here("output", "figures")
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
-# Optional second copy into the sibling manuscript repo (see main.R).
-paper_dir <- NULL
-if (save_to_paper_repo_enabled()) {
-  paper_dir <- file.path(paper_root(), "figures", "study_2")
-  dir.create(paper_dir, showWarnings = FALSE, recursive = TRUE)
-}
 
 # Arial metrics for cowplot / ggplotGrob (helpers.R).
 use_quartz_text_metrics()
@@ -1039,30 +1033,19 @@ names(pop_sigs) <- names(sig_plan)
 
 # Uses paper_pdf_device() from helpers.R; trim_bottom_in is local (legend strip).
 save_paper_fig <- function(file, plot, width, height, trim_bottom_in = 0) {
-  dests <- output_dir
-  if (!is.null(paper_dir)) dests <- c(dests, paper_dir)
-  for (dir in dests) {
-    path <- file.path(dir, file)
-    ggsave(
-      path,
-      plot,
-      width = width, height = height,
-      dpi = FIGURE_DPI, bg = "white", units = "in",
-      device = paper_pdf_device()
-    )
-    if (trim_bottom_in > 0) trim_pdf_bottom(path, trim_bottom_in)
-  }
-  if (!is.null(paper_dir)) {
-    cat(sprintf(
-      "Saved: output/figures/%s and paper/figures/study_2/%s (%.2f x %.2f in)\n",
-      file, file, width, height - trim_bottom_in
-    ))
-  } else {
-    cat(sprintf(
-      "Saved: output/figures/%s (%.2f x %.2f in)\n",
-      file, width, height - trim_bottom_in
-    ))
-  }
+  path <- file.path(output_dir, file)
+  ggsave(
+    path,
+    plot,
+    width = width, height = height,
+    dpi = FIGURE_DPI, bg = "white", units = "in",
+    device = paper_pdf_device()
+  )
+  if (trim_bottom_in > 0) trim_pdf_bottom(path, trim_bottom_in)
+  cat(sprintf(
+    "Saved: output/figures/%s (%.2f x %.2f in)\n",
+    file, width, height - trim_bottom_in
+  ))
 }
 
 # The legend strip is taller than the key, and that extra space is split

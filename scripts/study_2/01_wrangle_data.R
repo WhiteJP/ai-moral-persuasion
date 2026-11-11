@@ -64,19 +64,19 @@ cdp_method_class <- function(m) {
   )
 }
 
-# Keep one Qualtrics session per participantId. Preference order:
+# Keep one Qualtrics session per participant_id. Preference order:
 #   1. failed attention check (screenout; drop from ITT per prereg)
 #   2. assigned a condition (reached treatment)
 #   3. if two treated sessions, flag and keep the farther-along row
 #   4. higher Progress (pre-treatment dropouts)
-# Missing participantId rows are left as-is.
+# Missing participant_id rows are left as-is.
 dedupe_participant_sessions <- function(d) {
-  na_id <- filter(d, is.na(participantId))
+  na_id <- filter(d, is.na(participant_id))
   ranked <- d |>
-    filter(!is.na(participantId)) |>
+    filter(!is.na(participant_id)) |>
     mutate(.row_id = row_number()) |>
     arrange(
-      participantId,
+      participant_id,
       desc(coalesce(attention == 0, FALSE)),
       desc(!is.na(condition)),
       desc(Progress),
@@ -84,7 +84,7 @@ dedupe_participant_sessions <- function(d) {
       desc(StartDate),
       .row_id
     ) |>
-    distinct(participantId, .keep_all = TRUE) |>
+    distinct(participant_id, .keep_all = TRUE) |>
     select(-.row_id)
   bind_rows(na_id, ranked)
 }
@@ -463,8 +463,8 @@ d1_all <- d1_raw |>
     duration_min_secs = seconds_to_minsecs(duration_seconds)
   )
 
-## remove duplicate participantIds (same people starting multiple sessions)
-all_pids <- d1_all |> pull(participantId) # 3462 total
+## remove duplicate participant_ids (same people starting multiple sessions)
+all_pids <- d1_all |> pull(participant_id) # 3462 total
 unique_pids <- all_pids[!duplicated(all_pids)] # 3438 total - 24 duplicates
 dup_pids <- all_pids[duplicated(all_pids)] # all 24 duplicates occur only once
 
@@ -474,8 +474,8 @@ dup_pids <- all_pids[duplicated(all_pids)] # all 24 duplicates occur only once
 # 3. if two separate treatments, flag (none in this data)
 # 4. if both not treated, take one with most pages reached(pre-treatment dropouts anyway)
 dup_resolution <- d1_all |>
-  filter(!is.na(participantId), participantId %in% unique(dup_pids)) |>
-  group_by(participantId) |>
+  filter(!is.na(participant_id), participant_id %in% unique(dup_pids)) |>
+  group_by(participant_id) |>
   summarise(
     n_rows = n(),
     n_attn_fail = sum(attention == 0, na.rm = TRUE),
@@ -502,21 +502,21 @@ resolved_by_levels <- c(
 dup_resolution_counts <- dup_resolution |>
   mutate(resolved_by = factor(resolved_by, levels = resolved_by_levels)) |>
   count(resolved_by, name = "n_pids", .drop = FALSE)
-cat("Duplicate participantIds:", nrow(dup_resolution), "PIDs (", length(dup_pids), "extra rows)\n")
+cat("Duplicate participant_ids:", nrow(dup_resolution), "PIDs (", length(dup_pids), "extra rows)\n")
 print(dup_resolution_counts, n = Inf)
 
 two_treatments <- dup_resolution |> filter(resolved_by == "3 two treatments (flagged)")
 if (nrow(two_treatments) > 0) {
   warning(
-    nrow(two_treatments), " participantId(s) have two treated sessions; ",
+    nrow(two_treatments), " participant_id(s) have two treated sessions; ",
     "keeping the farther-along row. PIDs: ",
-    paste(two_treatments$participantId, collapse = ", "),
+    paste(two_treatments$participant_id, collapse = ", "),
     call. = FALSE
   )
   print(
     d1_all |>
-      filter(participantId %in% two_treatments$participantId) |>
-      select(participantId, StartDate, Progress, Finished, condition, attention),
+      filter(participant_id %in% two_treatments$participant_id) |>
+      select(participant_id, StartDate, Progress, Finished, condition, attention),
     n = Inf
   )
 }
@@ -551,8 +551,8 @@ d2_fu_invited <- d1 |>
 
 # Platform IDs passed into Qualtrics (participant, assignment, project).
 fu_id_export <- d2_fu_invited |>
-  select(participantId, assignmentId, projectId) |>
-  arrange(participantId)
+  select(participant_id, assignmentId, projectId) |>
+  arrange(participant_id)
 
 fu_export_path <- here::here("output", "study_2", "d1_fu_invited_cloudconnect_ids.csv")
 dir.create(dirname(fu_export_path), recursive = TRUE, showWarnings = FALSE)
@@ -589,12 +589,12 @@ d2_raw_deduped <- d2_raw |>
       (!is.na(voucher_DV_beeffirst) | !is.na(voucher_DV_vegfirst))
   ) |>
   arrange(
-    participantId,
+    participant_id,
     desc(.measures_done),
     StartDate,
     .row_id
   ) |>
-  distinct(participantId, .keep_all = TRUE) |>
+  distinct(participant_id, .keep_all = TRUE) |>
   select(-.row_id, -.measures_done)
 
 n_d2_dupes <- nrow(d2_raw) - nrow(d2_raw_deduped)
@@ -654,8 +654,8 @@ if (n_prev_meat_na + n_prev_donate_na > 0) {
 }
 d2_matched <- d2_all |>
   inner_join(
-    d1 |> select(participantId, condition, belief_meat_pre, belief_charity_pre),
-    by = "participantId"
+    d1 |> select(participant_id, condition, belief_meat_pre, belief_charity_pre),
+    by = "participant_id"
   ) |>
   mutate(
     belief_meat_change_t2 = belief_meat_t2 - belief_meat_pre,
@@ -665,7 +665,7 @@ d2_matched <- d2_all |>
 n_unmatched <- nrow(d2_all) - nrow(d2_matched)
 if (n_unmatched > 0) {
   warning(
-    n_unmatched, " follow-up participantId(s) are not in the round 1 completer sample.",
+    n_unmatched, " follow-up participant_id(s) are not in the round 1 completer sample.",
     call. = FALSE
   )
 }
@@ -676,10 +676,10 @@ n_fu_returned <- nrow(d2_matched)
 n_fu_beliefs <- sum(fu_both_beliefs)
 n_fu_behav <- sum(fu_both_behav)
 
-n_not_invited <- sum(!d2_matched$participantId %in% d2_fu_invited$participantId)
+n_not_invited <- sum(!d2_matched$participant_id %in% d2_fu_invited$participant_id)
 if (n_not_invited > 0) {
   warning(
-    n_not_invited, " matched follow-up participantId(s) were not on the invite list.",
+    n_not_invited, " matched follow-up participant_id(s) were not on the invite list.",
     call. = FALSE
   )
 }
@@ -695,7 +695,7 @@ d2 <- d2_matched |>
     !is.na(donation_cents_t2)
   ) |>
   select(
-    participantId, condition,
+    participant_id, condition,
     belief_meat_pre, belief_charity_pre,
     belief_meat_t2, belief_charity_t2,
     belief_meat_change_t2, belief_charity_change_t2,
@@ -705,7 +705,7 @@ d2 <- d2_matched |>
     order_t2, order_labelled_t2, pos1_t2, pos2_t2,
     StartDate_t2, EndDate_t2, RecordedDate_t2,
     Finished_t2, Progress_t2, duration_seconds_t2,
-    ResponseId_t2, feedback_t2,
+    any_of("ResponseId_t2"), feedback_t2,
     assignmentId_t2, projectId_t2
   )
 
@@ -717,8 +717,8 @@ d2 <- d2_matched |>
 
 d <- d1 |>
   inner_join(
-    d2 |> select(participantId, ends_with("_t2")),
-    by = "participantId"
+    d2 |> select(participant_id, ends_with("_t2")),
+    by = "participant_id"
   )
 
 # =============================================================================
@@ -795,13 +795,13 @@ as_raw <- as_raw |>
 # ended before the first belief and a later session has it — then take the
 # earliest session that has the first belief.
 as_deduped <- as_raw |>
-  filter(!is.na(participantId)) |>
+  filter(!is.na(participant_id)) |>
   mutate(.row_id = row_number()) |>
-  arrange(participantId, desc(.pre_done), StartDate, .row_id) |>
-  distinct(participantId, .keep_all = TRUE) |>
+  arrange(participant_id, desc(.pre_done), StartDate, .row_id) |>
+  distinct(participant_id, .keep_all = TRUE) |>
   select(-.row_id)
 
-n_as_no_pid <- sum(is.na(as_raw$participantId))
+n_as_no_pid <- sum(is.na(as_raw$participant_id))
 n_as_dupes <- nrow(as_raw) - n_as_no_pid - nrow(as_deduped)
 
 # People who left before giving the first belief are not respondents.
@@ -810,14 +810,14 @@ as_deduped <- as_deduped |>
   filter(.pre_done) |>
   select(-.pre_done, -.post_done)
 n_as_both_files <- as_raw |>
-  distinct(participantId, .arm_file) |>
-  count(participantId) |>
+  distinct(participant_id, .arm_file) |>
+  count(participant_id) |>
   filter(n > 1) |>
   nrow()
 if (n_as_both_files > 0) {
   warning(
     n_as_both_files,
-    " participantId(s) appear in both the lying and political-violence recontact files.",
+    " participant_id(s) appear in both the lying and political-violence recontact files.",
     call. = FALSE
   )
 }
@@ -825,7 +825,7 @@ if (n_as_both_files > 0) {
 as_r1 <- d1 |>
   filter(condition %in% c("polviol", "lying")) |>
   transmute(
-    participantId,
+    participant_id,
     condition_r1 = as.character(condition),
     belief_lying_t0 = belief_lying_pre,
     belief_lying_t1 = belief_lying_post,
@@ -875,14 +875,14 @@ d_as <- as_deduped |>
     pv_participation_t4 = pv_participation_post,
     pv_punishment_t4 = pv_punishment_post
   ) |>
-  left_join(as_r1, by = "participantId")
+  left_join(as_r1, by = "participant_id")
 
 # Recontact invites went only to round-1 completers in these two arms.
 n_as_unmatched <- sum(is.na(d_as$condition_r1))
 if (n_as_unmatched > 0) {
   warning(
     n_as_unmatched,
-    " recontact participantId(s) are not round-1 lying or political-violence completers.",
+    " recontact participant_id(s) are not round-1 lying or political-violence completers.",
     call. = FALSE
   )
 }
@@ -981,7 +981,7 @@ d_as <- d_as |>
     )
   ) |>
   relocate(
-    participantId, condition, ceiling_skip,
+    participant_id, condition, ceiling_skip,
     cond_belief_t0, cond_belief_t1, cond_belief_t2, cond_belief_t3, cond_belief_t4,
     belief_lying_t0, belief_lying_t1, belief_lying_t2, belief_lying_t3, belief_lying_t4,
     belief_polviol_t0, belief_polviol_t1, belief_polviol_t2, belief_polviol_t3, belief_polviol_t4,
@@ -997,9 +997,9 @@ d_as <- d_as |>
     reasons,
     ingroup_party, vignette_ingroup_party, party_id,
     StartDate, EndDate, duration_seconds, Finished, Progress,
-    ResponseId, assignmentId, projectId
+    any_of(c("ResponseId", "assignmentId", "projectId"))
   ) |>
-  arrange(condition, participantId)
+  arrange(condition, participant_id)
 
 n_as_pv_t4_mismatch <- d_as |>
   filter(condition == "polviol") |>
@@ -1050,7 +1050,7 @@ d_conv <- bind_cols(
 d_conv_wide <- d_conv |>
   tidyr::unnest(messages) |>
   select(
-    participantId, condition, reasons,
+    participant_id, condition, reasons,
     cond_belief_pre, cond_belief_post,
     belief_meat_pre, belief_meat_post, belief_meat_change,
     belief_charity_pre, belief_charity_post, belief_charity_change,
@@ -1058,12 +1058,12 @@ d_conv_wide <- d_conv |>
     belief_polviol_pre, belief_polviol_post, belief_polviol_change,
     role, content
   ) |>
-  group_by(participantId, role) |>
+  group_by(participant_id, role) |>
   mutate(
     n = row_number(),
     role = paste0(role, n)
   ) |>
-  arrange(participantId, n, role) |>
+  arrange(participant_id, n, role) |>
   select(-n) |>
   pivot_wider(names_from = role, values_from = content) |>
   relocate(
@@ -1092,16 +1092,16 @@ d_as_conv_wide <- bind_cols(
 ) |>
   tidyr::unnest(messages) |>
   select(
-    participantId, condition, reasons,
+    participant_id, condition, reasons,
     cond_belief_t0, cond_belief_t1, cond_belief_t2, cond_belief_t3, cond_belief_t4,
     role, content
   ) |>
-  group_by(participantId, role) |>
+  group_by(participant_id, role) |>
   mutate(
     n = row_number(),
     role = paste0(role, n)
   ) |>
-  arrange(participantId, n, role) |>
+  arrange(participant_id, n, role) |>
   select(-n) |>
   pivot_wider(names_from = role, values_from = content) |>
   ungroup() |>

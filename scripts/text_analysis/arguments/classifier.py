@@ -114,7 +114,7 @@ def _format_conversation(row: pd.Series) -> dict[str, Any]:
                 parts.extend([f"\n=== PARTICIPANT REPLY {user_i} ===", user])
 
     return {
-        "id": str(row["participantId"]),
+        "id": str(row["participant_id"]),
         "condition": str(row["condition"]),
         "n_ai_rounds": n_ai,
         "n_user_rounds": n_user,
@@ -137,7 +137,7 @@ def export_conversations(
         raise ValueError("Control conversations are not included in this analysis")
 
     raw = pd.read_csv(csv_path)
-    needed = ["participantId", "condition", "reasons", "assistant1", "user1"]
+    needed = ["participant_id", "condition", "reasons", "assistant1", "user1"]
     missing = [c for c in needed if c not in raw.columns]
     if missing:
         raise RuntimeError(

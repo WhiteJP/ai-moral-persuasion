@@ -62,7 +62,7 @@ d_corr <- purrr::map_dfr(seq_len(nrow(arm_defs)), function(i) {
     mutate(has_chat2 = has_chat2) |>
     filter(condition == a$condition) |>
     transmute(
-      participantId,
+      participant_id,
       condition = a$condition,
       arm_lab = a$arm_lab,
       has_chat2,

@@ -13,8 +13,7 @@
 #
 # Analysis 5 winsorizes the reflection outcomes at the 95th percentile.
 # Writes the full-sample and exclusion estimates side by side to
-# output/study_1/tables/pilot-full-vs-exclusion.tex, and, when
-# save_to_paper_repo is TRUE, copies that table into the manuscript repo.
+# output/study_1/tables/pilot-full-vs-exclusion.tex.
 
 library(dplyr)
 library(tidyr)
@@ -28,8 +27,8 @@ d2 <- readRDS(here::here("data", "study_1", "d2.rds"))
 
 d <- d |>
   left_join(
-    d2 |> select(PROLIFIC_PID, prev_meat_t2 = prev_meat, prev_donate_t2 = prev_donate),
-    by = "PROLIFIC_PID"
+    d2 |> select(participant_id, prev_meat_t2 = prev_meat, prev_donate_t2 = prev_donate),
+    by = "participant_id"
   )
 
 cat("Initial sample:   N =", nrow(d1), "\n")

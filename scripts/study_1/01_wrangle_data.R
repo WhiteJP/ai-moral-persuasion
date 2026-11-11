@@ -111,7 +111,7 @@ d2_raw <- read_csv_qualtrics(
 )
 
 d2_all <- d2_raw |>
-  left_join(d1 |> select(PROLIFIC_PID, condition), by = "PROLIFIC_PID") |>
+  left_join(d1 |> select(participant_id, condition), by = "participant_id") |>
   filter(!is.na(condition)) |>
   mutate(
     cond2 = factor(ifelse(grepl("meat", moralBelief), "Meat", "Charity")),
@@ -132,7 +132,7 @@ d2 <- d2_all |> filter(Finished == 1)
 # =============================================================================
 
 d_all <- d1 |>
-  left_join(d2 |> select(PROLIFIC_PID, contains("t2")), by = "PROLIFIC_PID")
+  left_join(d2 |> select(participant_id, contains("t2")), by = "participant_id")
 
 d <- d_all |> filter(!is.na(meat_wrong_t2))
 

@@ -16,7 +16,7 @@
 #   fig-belief-te-matrix-db.png
 #   fig-behavior-te-matrix.png
 #   fig-te-matrix-belief-behavior.png
-#   fig-te-matrix.pdf (double column, also copied to paper/figures/study_2/)
+#   fig-te-matrix.pdf (double column)
 
 library(dplyr)
 library(tidyr)

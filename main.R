@@ -11,17 +11,11 @@
 #
 # Prerequisites: run renv::restore() first to install required packages.
 #
-# Optional: set save_to_paper_repo <- TRUE to also copy paper figures/tables
-# into the sibling manuscript repo (../llm-moral-persuasion/paper). That is
-# only for updating the manuscript while drafting; leave FALSE for a public
-# clone. Default when unset is FALSE.
-#
 # Optional: set mediation_bootstrap <- FALSE for a fast smoke test of the
 # mediation analyses. mediate() then uses 20 quasi-Bayesian draws instead of
 # the reported 1,000-simulation bootstrap. Regression coefficients match a
 # full run. The indirect effect, direct effect, total effect, and percent
 # mediated are averages of those draws, so they will not match the paper.
-# Nothing is copied to the manuscript repo while this is FALSE.
 # Default when unset is TRUE.
 #
 # Optional: set rerun_text_analysis <- TRUE to regenerate Study 2 LLM text
@@ -34,12 +28,8 @@ library(here)
 # (default is often 80; respects already-wider terminals via max).
 options(width = max(getOption("width"), 200L))
 
-# Copy figures/tables into ../llm-moral-persuasion/paper when TRUE.
-# Leave FALSE for public reproduction; set TRUE only while updating the manuscript.
-save_to_paper_repo <- FALSE
-
 # Reported mediation intervals use a nonparametric bootstrap (1,000 sims, seed 42).
-# Set FALSE for a fast smoke test: 20 quasi-Bayesian draws, no manuscript copy.
+# Set FALSE for a fast smoke test: 20 quasi-Bayesian draws.
 # Leave TRUE for numbers that go in the paper.
 mediation_bootstrap <- TRUE
 
@@ -57,7 +47,6 @@ if (!isTRUE(mediation_bootstrap)) {
   cat("SMOKE TEST: mediation_bootstrap is FALSE.\n")
   cat("Mediation uses 20 quasi-Bayesian draws, not the reported bootstrap.\n")
   cat("Regression coefficients match a full run. Effects from mediate() do not.\n")
-  cat("Figures and tables will not be copied to the manuscript repo.\n")
   cat("====================================================================\n\n")
 }
 
@@ -164,9 +153,4 @@ cat("Study 1 figures: output/study_1/figures/\n")
 cat("Study 1 tables:  output/study_1/tables/\n")
 cat("Study 2 figures: output/study_2/figures/ and output/figures/\n")
 cat("Study 2 tables:  output/study_2/tables/\n")
-if (isTRUE(save_to_paper_repo) && isTRUE(mediation_bootstrap)) {
-  cat("Also copied selected figures/tables to ../llm-moral-persuasion/paper/\n")
-} else if (isTRUE(save_to_paper_repo)) {
-  cat("Skipped manuscript repo copies because mediation_bootstrap is FALSE.\n")
-}
 cat("====================================================================\n")

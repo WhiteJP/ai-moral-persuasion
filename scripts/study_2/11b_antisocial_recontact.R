@@ -82,10 +82,10 @@ d_corr_t0 |>
 # Lag is recontact StartDate minus round-1 StartDate, both in UTC.
 
 d_as_demo <- d_as |>
-  dplyr::select(participantId, arm_lab, StartDate_fu = StartDate) |>
+  dplyr::select(participant_id, arm_lab, StartDate_fu = StartDate) |>
   left_join(
-    d1 |> dplyr::select(participantId, gender, age, StartDate_r1 = StartDate),
-    by = "participantId"
+    d1 |> dplyr::select(participant_id, gender, age, StartDate_r1 = StartDate),
+    by = "participant_id"
   ) |>
   mutate(lag_days = as.numeric(difftime(StartDate_fu, StartDate_r1, units = "days")))
 
@@ -152,11 +152,11 @@ as_arms <- arm_defs$condition
 d1_itt_as <- readRDS(here("data", "study_2", "study2_d1_itt.rds")) |>
   filter(condition %in% as_arms)
 d1_as <- d1 |> filter(condition %in% as_arms)
-as_returned_ids <- d_as$participantId
+as_returned_ids <- d_as$participant_id
 
 test_as_return <- function(base, label) {
   counts <- base |>
-    mutate(returned = participantId %in% as_returned_ids) |>
+    mutate(returned = participant_id %in% as_returned_ids) |>
     count(condition, returned) |>
     tidyr::pivot_wider(
       names_from = returned, values_from = n, values_fill = 0L,
@@ -221,7 +221,7 @@ d_fu_all <- purrr::map_dfr(seq_len(nrow(arm_defs)), function(i) {
   d1 |>
     filter(condition == a$condition) |>
     transmute(
-      participantId,
+      participant_id,
       arm_lab = a$arm_lab,
       t0 = .data[[a$pre]],
       t1 = .data[[a$post]],
@@ -229,11 +229,11 @@ d_fu_all <- purrr::map_dfr(seq_len(nrow(arm_defs)), function(i) {
     )
 }) |>
   left_join(
-    d_as |> dplyr::select(participantId, t3 = cond_belief_t3, t4 = cond_belief_t4),
-    by = "participantId"
+    d_as |> dplyr::select(participant_id, t3 = cond_belief_t3, t4 = cond_belief_t4),
+    by = "participant_id"
   ) |>
   mutate(
-    in_recontact = participantId %in% d_as$participantId,
+    in_recontact = participant_id %in% d_as$participant_id,
     last = coalesce(t4, t3, t2, t1),
     arm_lab = factor(arm_lab, levels = arm_defs$arm_lab)
   )
@@ -404,7 +404,7 @@ d_pv_vig <- d_as |>
     names_pattern = "pv_(.+)_(t[134])",
     values_to = "score"
   ) |>
-  dplyr::select(participantId, stem, timepoint, score) |>
+  dplyr::select(participant_id, stem, timepoint, score) |>
   left_join(pv_items, by = "stem") |>
   mutate(item_lab = factor(item_lab, levels = pv_panel_levels))
 
@@ -416,7 +416,7 @@ d_pv_wide <- d_pv_vig |>
 d_pv_mean3 <- d_as |>
   filter(condition == "polviol") |>
   transmute(
-    participantId,
+    participant_id,
     item_lab = factor("Mean of three", levels = pv_panel_levels),
     t1 = (pv_support_t1 + pv_justification_t1 + pv_participation_t1) / 3,
     t3 = (pv_support_t3 + pv_justification_t3 + pv_participation_t3) / 3,
@@ -438,7 +438,7 @@ pv_comp_at <- function(support, justification, punishment) {
 d_pv_zcomp <- d_as |>
   filter(condition == "polviol") |>
   transmute(
-    participantId,
+    participant_id,
     item_lab = factor("Preregistered composite", levels = pv_panel_levels),
     t1 = pv_comp_at(pv_support_t1, pv_justification_t1, pv_punishment_t1),
     t3 = pv_comp_at(pv_support_t3, pv_justification_t3, pv_punishment_t3),
@@ -447,7 +447,7 @@ d_pv_zcomp <- d_as |>
   mutate(last = coalesce(t4, t3))
 
 d_pv_plot <- bind_rows(
-  d_pv_wide |> dplyr::select(participantId, item_lab, t1, t3, t4, last),
+  d_pv_wide |> dplyr::select(participant_id, item_lab, t1, t3, t4, last),
   d_pv_mean3,
   d_pv_zcomp
 )

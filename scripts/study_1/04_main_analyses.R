@@ -52,8 +52,8 @@ d2 <- readRDS(here::here("data", "study_1", "d2.rds"))
 
 d <- d |>
   left_join(
-    d2 |> select(PROLIFIC_PID, prev_meat_t2 = prev_meat, prev_donate_t2 = prev_donate),
-    by = "PROLIFIC_PID"
+    d2 |> select(participant_id, prev_meat_t2 = prev_meat, prev_donate_t2 = prev_donate),
+    by = "participant_id"
   )
 
 cat("Initial sample:   N =", nrow(d1), "\n")

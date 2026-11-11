@@ -77,19 +77,19 @@ df_other <- read_csv(here("data", "study_1", "classifications_meat_other.csv"), 
 
 d_meat <- d1 |>
   filter(condition == "Meat", meat_wrong_pre <= 50) |>
-  dplyr::select(PROLIFIC_PID, meat_wrong_pre) |>
+  dplyr::select(participant_id, meat_wrong_pre) |>
   left_join(
     df_4ns |> dplyr::select(id, natural_claude, natural_gpt, natural_deepseek,
                      normal_claude, normal_gpt, normal_deepseek,
                      necessary_claude, necessary_gpt, necessary_deepseek,
                      nice_claude, nice_gpt, nice_deepseek),
-    by = c("PROLIFIC_PID" = "id")
+    by = c("participant_id" = "id")
   ) |>
   left_join(
     df_other |> dplyr::select(id, religious_claude, religious_gpt, religious_deepseek,
                        amoral_claude, amoral_gpt, amoral_deepseek,
                        conditional_claude, conditional_gpt, conditional_deepseek),
-    by = c("PROLIFIC_PID" = "id")
+    by = c("participant_id" = "id")
   )
 
 meat_4n_cats <- c("natural", "normal", "necessary", "nice")
@@ -123,9 +123,9 @@ charity_cats <- c(
 
 d_charity <- d1 |>
   filter(condition == "Charity", charity_wrong_pre <= 50) |>
-  dplyr::select(PROLIFIC_PID, charity_wrong_pre) |>
+  dplyr::select(participant_id, charity_wrong_pre) |>
   left_join(df_charity |> dplyr::select(id, contains("_claude"), contains("_gpt"), contains("_deepseek")),
-            by = c("PROLIFIC_PID" = "id"))
+            by = c("participant_id" = "id"))
 
 charity_agreement <- purrr::map_dfr(charity_cats, function(cat) {
   pct_all_three_agree(d_charity, cat) |>

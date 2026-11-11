@@ -127,7 +127,7 @@ print(d1 |> count(condition))
 
 section("DEMOGRAPHICS: FOLLOW-UP SAMPLE (returners)")
 
-d1_fu <- d1 |> filter(participantId %in% d2_matched$participantId)
+d1_fu <- d1 |> filter(participant_id %in% d2_matched$participant_id)
 
 cat(sprintf("\nReturners: %d of %d invited (%.1f%%)\n",
             nrow(d1_fu), n_fu_invited, 100 * nrow(d1_fu) / n_fu_invited))
@@ -166,8 +166,8 @@ d_lag <- d2_matched |>
     !is.na(voucher_is_veg_t2), !is.na(donation_cents_t2)
   ) |>
   inner_join(
-    d1 |> select(participantId, StartDate_r1 = StartDate),
-    by = "participantId"
+    d1 |> select(participant_id, StartDate_r1 = StartDate),
+    by = "participant_id"
   )
 fu_lag_days <- as.numeric(difftime(d_lag$StartDate_t2, d_lag$StartDate_r1, units = "days"))
 fu_lag_q <- quantile(fu_lag_days, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)

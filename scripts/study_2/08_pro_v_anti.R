@@ -37,7 +37,6 @@
 #   output/study_2/tables/pro-v-anti-persuasion.csv
 #   output/study_2/tables/pro-v-anti-persuasion.tex
 # The .tex table is the slider-point comparison reported in the paper.
-# It is also copied to paper/tables/ in the manuscript repo.
 
 library(dplyr)
 library(estimatr)
@@ -57,7 +56,7 @@ d1 <- readRDS(here("data", "study_2", "study2_d1.rds")) |>
     order = factor(order)
   )
 
-stopifnot(!anyNA(d1$participantId))
+stopifnot(!anyNA(d1$participant_id))
 
 cat("Analysis sample (d1 completers): N =", nrow(d1), "\n")
 print(table(d1$condition))
@@ -76,7 +75,7 @@ long <- bind_rows(lapply(seq_len(nrow(belief_defs)), function(i) {
       !is.na(condition), !is.na(order)
     ) |>
     transmute(
-      participantId,
+      participant_id,
       domain = belief_defs$domain[i],
       condition,
       order,
@@ -100,7 +99,7 @@ fit_stack <- function(data, outcome) {
     outcome ~ 0 + domain + domain:condition + domain:pre_c +
       domain:condition:pre_c + domain:order,
     data = dat,
-    clusters = participantId,
+    clusters = participant_id,
     se_type = "CR2"
   )
 }
@@ -230,7 +229,7 @@ report_scale <- function(model, scale_label, digits) {
 section("STACKED MODEL")
 cat(
   "Rows =", nrow(long),
-  "| clusters =", n_distinct(long$participantId), "\n"
+  "| clusters =", n_distinct(long$participant_id), "\n"
 )
 
 m_points <- fit_stack(long, "y")

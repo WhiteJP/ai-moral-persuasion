@@ -147,11 +147,10 @@ cat(sprintf(
   sum(mentioned$group == "mentioned_neither")
 ))
 
-# Heads rates by majority category. Rating file ids are CloudResearch
-# participantId values, not Qualtrics ResponseId.
+# Heads rates by majority category. Rating file id matches participant_id.
 d1 <- readRDS(here("data", "study_2", "study2_d1.rds"))
-if (!"participantId" %in% names(d1)) {
-  stop("study2_d1.rds is missing participantId; cannot join direct-lie codes.")
+if (!"participant_id" %in% names(d1)) {
+  stop("study2_d1.rds is missing participant_id; cannot join direct-lie codes.")
 }
 if (!"coin_heads" %in% names(d1)) {
   d1 <- d1 |>
@@ -160,7 +159,7 @@ if (!"coin_heads" %in% names(d1)) {
 lying <- d1 |>
   filter(condition == "lying") |>
   transmute(
-    id = as.character(participantId),
+    id = as.character(participant_id),
     coin_heads = as.numeric(coin_heads)
   )
 

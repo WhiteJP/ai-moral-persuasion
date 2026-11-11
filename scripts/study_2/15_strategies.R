@@ -8,7 +8,7 @@
 #   Claude, GPT, and Grok ratings.
 #
 # Figures: output/study_2/figures/
-#   fig-ai-strategies.png / fig-ai-strategies.pdf (paper copy via save_paper_pdf)
+#   fig-ai-strategies.png / fig-ai-strategies.pdf
 #
 # Tables: output/study_2/tables/
 #   strategy-agreement.tex / strategy-agreement.csv

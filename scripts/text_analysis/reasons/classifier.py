@@ -96,7 +96,7 @@ def export_reasons(
         raise ValueError(f"belief_op must be one of {sorted(_BELIEF_OPS)}, got {belief_op!r}")
 
     raw = _load_conversations(csv_path)
-    missing = {"participantId", "condition", "reasons", belief_col} - set(raw.columns)
+    missing = {"participant_id", "condition", "reasons", belief_col} - set(raw.columns)
     if missing:
         raise RuntimeError(
             f"{csv_path.name} is missing columns: {', '.join(sorted(missing))}"
@@ -116,7 +116,7 @@ def export_reasons(
     )
     out = pd.DataFrame(
         {
-            "id": raw.loc[keep, "participantId"].astype(str).to_numpy(),
+            "id": raw.loc[keep, "participant_id"].astype(str).to_numpy(),
             "text": text.loc[keep].to_numpy(),
             "belief_pre": belief.loc[keep].to_numpy(),
         }

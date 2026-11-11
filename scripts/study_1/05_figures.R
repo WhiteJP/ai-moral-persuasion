@@ -5,8 +5,7 @@
 # belief change (T1 vs T2), behavioral outcomes (donation + voucher by time),
 # participant reasoning themes (meat vs charity skeptics), and AI strategy use.
 # Exports to output/study_1/figures/: fig-belief-change.png, fig-behavior.png,
-# fig-participant-reasoning.png, fig-ai-strategies.png, plus a PDF of each
-# that is also copied to the paper repo (paper/figures/study_1/).
+# fig-participant-reasoning.png, fig-ai-strategies.png, plus a PDF of each.
 #
 
 library(dplyr)
@@ -33,7 +32,7 @@ d  <- readRDS(here("data", "study_1", "d.rds"))   # initial + 1-month follow-up
 df_4ns <- read_csv(here("data", "study_1", "classifications_4ns.csv"), show_col_types = FALSE) |>
   dplyr::select(id, natural_consensus, normal_consensus, necessary_consensus, nice_consensus) |>
   rename(
-    PROLIFIC_PID                = id,
+    participant_id                = id,
     meat_4n_natural_consensus   = natural_consensus,
     meat_4n_normal_consensus    = normal_consensus,
     meat_4n_necessary_consensus = necessary_consensus,
@@ -42,12 +41,12 @@ df_4ns <- read_csv(here("data", "study_1", "classifications_4ns.csv"), show_col_
 
 df_other <- read_csv(here("data", "study_1", "classifications_meat_other.csv"), show_col_types = FALSE) |>
   dplyr::select(id, religious_consensus, amoral_consensus, conditional_consensus) |>
-  rename(PROLIFIC_PID = id)
+  rename(participant_id = id)
 
 d_meat <- d1 |>
   filter(condition == "Meat") |>
-  left_join(df_4ns, by = "PROLIFIC_PID") |>
-  left_join(df_other, by = "PROLIFIC_PID")
+  left_join(df_4ns, by = "participant_id") |>
+  left_join(df_other, by = "participant_id")
 
 d_meat_low <- d_meat |> filter(meat_wrong_pre <= 50)
 
@@ -61,11 +60,11 @@ df_charity_reason <- read_csv(here("data", "study_1", "classifications_charity_r
          property_rights_consensus, systemic_consensus,
          limited_scope_consensus) |>
   rename_with(~ paste0("charity_reason_", .), -id) |>
-  rename(PROLIFIC_PID = id)
+  rename(participant_id = id)
 
 d_charity <- d1 |>
   filter(condition == "Charity") |>
-  left_join(df_charity_reason, by = "PROLIFIC_PID")
+  left_join(df_charity_reason, by = "participant_id")
 
 d_charity_low <- d_charity |> filter(charity_wrong_pre <= 50)
 
@@ -768,7 +767,7 @@ save_plot(file.path(output_dir, "fig-ai-strategies.png"),
 cat("Saved: output/study_1/figures/fig-ai-strategies.png\n")
 
 # =============================================================================
-# Paper PDFs (also copied to paper/figures/study_1/)
+# Paper PDFs
 # =============================================================================
 
 paper_figs <- list(
@@ -780,6 +779,6 @@ paper_figs <- list(
 for (f in paper_figs) {
   save_paper_pdf(
     f[[1]], f[[2]], width = f[[3]], height = FIGURE_HEIGHT / 3,
-    output_dir = output_dir, study = "study_1", png = FALSE
+    output_dir = output_dir, png = FALSE
   )
 }

@@ -13,7 +13,6 @@
 #
 # Output:
 #   output/study_2/tables/belief-behavior-correlations.csv
-#   (copied to llm-moral-persuasion/paper/tables/)
 
 library(dplyr)
 library(here)
@@ -61,4 +60,3 @@ out_dir <- here("output", "study_2", "tables")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 out_csv <- file.path(out_dir, "belief-behavior-correlations.csv")
 write.csv(out, out_csv, row.names = FALSE)
-copy_paper_table(out_csv)

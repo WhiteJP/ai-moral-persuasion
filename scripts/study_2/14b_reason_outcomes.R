@@ -157,7 +157,7 @@ read_codes <- function(path, cats) {
   }
   df |>
     transmute(
-      participantId = as.character(id),
+      participant_id = as.character(id),
       across(all_of(cons), as_logical_flag)
     ) |>
     mutate(across(all_of(cons), ~ as.integer(.x %in% TRUE)))
@@ -406,7 +406,7 @@ coef_frame <- function(fit, spec, outcome_name) {
 
 d1 <- readRDS(here("data", "study_2", "study2_d1.rds")) |>
   mutate(
-    participantId = as.character(participantId),
+    participant_id = as.character(participant_id),
     voucher_is_veg = as.integer(
       coalesce(voucher_DV_beeffirst, voucher_DV_vegfirst) == 1
     ),
@@ -451,11 +451,11 @@ for (spec in specs) {
     inner_join(
       d1 |>
         select(
-          participantId, order,
+          participant_id, order,
           all_of(c(spec$belief, spec$pre, spec$behavior))
         ) |>
         rename(pre_belief = all_of(spec$pre)),
-      by = "participantId"
+      by = "participant_id"
     )
 
   n_unmatched <- nrow(codes) - nrow(merged)

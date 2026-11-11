@@ -266,19 +266,20 @@ for (i in seq_along(factor_fits)) {
 }
 }
 
+# Session dedupe leaves one row per person, so this matches a ResponseId check.
 d_attr_t1 <- d1_itt |>
-  mutate(attrited = as.integer(!ResponseId %in% d1$ResponseId))
+  mutate(attrited = as.integer(!participant_id %in% d1$participant_id))
 run_attrition_predictors(d_attr_t1, "PRETREATMENT PREDICTORS OF T1 ATTRITION (ITT)")
 
 d_attr_t2_itt <- d1_itt_fu |>
-  mutate(attrited = as.integer(!participantId %in% d_fu$participantId))
+  mutate(attrited = as.integer(!participant_id %in% d_fu$participant_id))
 run_attrition_predictors(
   d_attr_t2_itt,
   "PRETREATMENT PREDICTORS OF T2 ATTRITION (ITT, RECONTACTED ARMS)"
 )
 
 d_attr_t2_invited <- d1_fu |>
-  mutate(attrited = as.integer(!participantId %in% d_fu$participantId))
+  mutate(attrited = as.integer(!participant_id %in% d_fu$participant_id))
 run_attrition_predictors(
   d_attr_t2_invited,
   "PRETREATMENT PREDICTORS OF T2 ATTRITION (T1 COMPLETERS, INVITED ARMS)"
@@ -399,14 +400,14 @@ ctrl_mean <- function(data, outcome_var) {
 
 # T2 outcomes observed on any matched returner, including a partial session.
 t2_obs <- d_t2_matched |>
-  select(participantId, any_of(c(
+  select(participant_id, any_of(c(
     "belief_meat_t2", "belief_charity_t2",
     "voucher_is_veg_t2", "donation_cents_t2"
   )))
 
 d_itt_t2 <- d_itt |>
   filter(as.character(condition) %in% cond_t2) |>
-  left_join(t2_obs, by = "participantId")
+  left_join(t2_obs, by = "participant_id")
 
 # Control means from observed follow-up scores (returners), and from observed
 # round-1 scores on the ITT file.

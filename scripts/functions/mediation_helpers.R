@@ -70,11 +70,6 @@ announce_mediation_settings <- function() {
     ))
     cat("Regression coefficients match a full run.\n")
     cat("Indirect, direct, and total effects are averages of these draws, not the paper estimates.\n")
-    if (isTRUE(get0(
-      "save_to_paper_repo", envir = .GlobalEnv, ifnotfound = FALSE, inherits = TRUE
-    ))) {
-      cat("Figures and tables will not be copied to the manuscript repo.\n")
-    }
     cat("====================================================================\n")
   }
   cat(mediation_sims_line(), "\n", sep = "")
